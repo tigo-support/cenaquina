@@ -1,0 +1,679 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cenaquina Pariente AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Ajustes específicos para móviles y scrollbar */
+        .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #05050a; }
+        ::-webkit-scrollbar-thumb { background: #4c1d95; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6d28d9; }
+        .hidden-tab { display: none !important; }
+    </style>
+</head>
+<body class="min-h-screen bg-[#05050a] text-white font-sans selection:bg-cyan-500 selection:text-black flex flex-col">
+
+    <!-- HEADER TOP (Fijo) -->
+    <header class="border-b border-violet-900/30 bg-black/60 backdrop-blur-xl sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-violet-600 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.4)]">
+                    <i data-lucide="wand-2" class="text-white w-[22px] h-[22px]"></i>
+                </div>
+                <h1 class="text-xl sm:text-2xl font-black tracking-wider bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-violet-400 to-fuchsia-400">
+                    CENAQUINA<span class="font-light">PARIENTE</span> AI
+                </h1>
+            </div>
+            
+            <!-- TABS DE NAVEGACIÓN DESKTOP -->
+            <div class="hidden md:flex gap-2" id="desktop-nav">
+                <!-- Se llenan por JS -->
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 pt-6 pb-28 md:pb-10 md:p-8">
+        
+        <!-- VISTA CREDENCIAL 1 -->
+        <div id="view-cred1" class="tab-content">
+            <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6 w-full">
+                <!-- PANEL ANVERSO -->
+                <div class="bg-[#0b0c16] border border-cyan-900/50 rounded-[1.5rem] p-5 sm:p-6 shadow-[0_0_25px_rgba(6,182,212,0.1)] relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 to-blue-600"></div>
+                    <h2 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 mb-4 flex items-center gap-2">
+                        <i data-lucide="image" class="text-cyan-400 w-[22px] h-[22px]"></i> Edición Anverso
+                    </h2>
+                    
+                    <div class="text-[11px] text-cyan-200/80 mb-5 bg-cyan-900/20 p-3 rounded-lg border border-cyan-800/40 flex items-center gap-2">
+                        <i data-lucide="image" class="shrink-0 w-4 h-4"></i> Plantilla precargada lista.
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Número de Carnet</label>
+                        <input type="text" id="cred1-carnet" placeholder="Ej: 12345678" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-violet-400 mb-2 tracking-wider uppercase">Foto de Reemplazo (Rostro)</label>
+                        <label for="cred1-foto" class="flex flex-col items-center justify-center w-full min-h-[120px] p-4 border-2 border-dashed border-violet-600/60 rounded-xl cursor-pointer bg-violet-900/10 hover:bg-violet-900/30 active:bg-violet-900/40 hover:border-cyan-400 transition-all text-violet-300 group">
+                            <i data-lucide="upload" class="mb-3 text-violet-400 group-hover:text-cyan-400 transition-colors w-[28px] h-[28px]"></i>
+                            <span id="cred1-foto-label" class="text-sm font-semibold truncate w-full text-center px-4">Toca para subir una foto</span>
+                            <input type="file" id="cred1-foto" class="hidden" accept="image/*">
+                        </label>
+                    </div>
+                    
+                    <div class="mt-auto pt-4">
+                        <button id="cred1-btn-anv" onclick="generateCredAnverso(1)" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 active:from-violet-700 active:to-fuchsia-700 text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_20px_rgba(192,38,211,0.4)] transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-lucide="wand-2" class="btn-icon w-5 h-5"></i>
+                            <i data-lucide="loader-2" class="btn-loader w-5 h-5 animate-spin hidden"></i>
+                            <span>Generar Anverso</span>
+                        </button>
+                    </div>
+
+                    <div id="cred1-res-anv-container" class="hidden mt-6 p-4 bg-[#05050a] border border-cyan-800/60 rounded-2xl">
+                        <p class="text-sm text-cyan-300 mb-3 font-bold text-center">Resultado:</p>
+                        <img id="cred1-res-anv-img" src="" alt="Anverso Generado" class="w-full rounded-xl border border-cyan-900 shadow-lg" />
+                        <button onclick="downloadImage('cred1-res-anv-img', 'anverso_credencial_1.jpg')" class="mt-4 w-full bg-cyan-900/40 hover:bg-cyan-800 active:bg-cyan-700 text-cyan-300 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="download" class="w-5 h-5"></i> Guardar Imagen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PANEL REVERSO -->
+                <div class="bg-[#0b0c16] border border-fuchsia-900/50 rounded-[1.5rem] p-5 sm:p-6 shadow-[0_0_25px_rgba(192,38,211,0.1)] relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-fuchsia-400 to-pink-600"></div>
+                    <h2 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 to-pink-400 mb-4 flex items-center gap-2">
+                        <i data-lucide="image" class="text-fuchsia-400 w-[22px] h-[22px]"></i> Edición Reverso
+                    </h2>
+
+                    <div class="text-[11px] text-fuchsia-200/80 mb-5 bg-fuchsia-900/20 p-3 rounded-lg border border-fuchsia-800/40 flex items-center gap-2">
+                        <i data-lucide="image" class="shrink-0 w-4 h-4"></i> Plantilla precargada lista.
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Nombre Completo</label>
+                        <input type="text" id="cred1-nombre" placeholder="Ej: Juan Pérez" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Fecha de Nacimiento</label>
+                        <input type="text" id="cred1-fecha" placeholder="Ej: 15/08/1990" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Profesión</label>
+                        <input type="text" id="cred1-profesion" placeholder="Ej: Ingeniero" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Domicilio</label>
+                        <input type="text" id="cred1-domicilio" placeholder="Ej: Av. Principal 123" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    
+                    <div class="mt-auto pt-4">
+                        <button id="cred1-btn-rev" onclick="generateCredReverso(1)" class="w-full bg-gradient-to-r from-fuchsia-600 to-pink-600 active:from-fuchsia-700 active:to-pink-700 text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_20px_rgba(236,72,153,0.4)] transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-lucide="wand-2" class="btn-icon w-5 h-5"></i>
+                            <i data-lucide="loader-2" class="btn-loader w-5 h-5 animate-spin hidden"></i>
+                            <span>Generar Reverso</span>
+                        </button>
+                    </div>
+
+                    <div id="cred1-res-rev-container" class="hidden mt-6 p-4 bg-[#05050a] border border-fuchsia-800/60 rounded-2xl">
+                        <p class="text-sm text-fuchsia-300 mb-3 font-bold text-center">Resultado:</p>
+                        <img id="cred1-res-rev-img" src="" alt="Reverso Generado" class="w-full rounded-xl border border-fuchsia-900 shadow-lg" />
+                        <button onclick="downloadImage('cred1-res-rev-img', 'reverso_credencial_1.jpg')" class="mt-4 w-full bg-fuchsia-900/40 hover:bg-fuchsia-800 active:bg-fuchsia-700 text-fuchsia-300 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="download" class="w-5 h-5"></i> Guardar Imagen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DESCARGA DOBLE (Oculta por defecto) -->
+                <div id="cred1-download-all" class="hidden lg:col-span-2 flex justify-center mt-2 mb-6">
+                    <button onclick="downloadBoth(1)" class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 active:from-emerald-600 active:to-teal-600 text-white font-bold py-4 px-8 rounded-2xl shadow-[0_4px_20px_rgba(16,185,129,0.5)] flex items-center justify-center gap-3 transition-transform active:scale-95">
+                        <i data-lucide="save-all" class="w-6 h-6"></i> Descargar Ambas Partes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA CREDENCIAL 2 -->
+        <div id="view-cred2" class="tab-content hidden-tab">
+            <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6 w-full">
+                <!-- PANEL ANVERSO -->
+                <div class="bg-[#0b0c16] border border-cyan-900/50 rounded-[1.5rem] p-5 sm:p-6 shadow-[0_0_25px_rgba(6,182,212,0.1)] relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 to-blue-600"></div>
+                    <h2 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-400 mb-4 flex items-center gap-2">
+                        <i data-lucide="image" class="text-cyan-400 w-[22px] h-[22px]"></i> Edición Anverso (Carnet Frontal)
+                    </h2>
+                    
+                    <div class="text-[11px] text-cyan-200/80 mb-5 bg-cyan-900/20 p-3 rounded-lg border border-cyan-800/40 flex items-center gap-2">
+                        <i data-lucide="image" class="shrink-0 w-4 h-4"></i> Plantilla precargada lista.
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Número de Carnet</label>
+                        <input type="text" id="cred2-carnet" placeholder="Ej: 12345678" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-violet-400 mb-2 tracking-wider uppercase">Foto de Reemplazo (Rostro)</label>
+                        <label for="cred2-foto" class="flex flex-col items-center justify-center w-full min-h-[120px] p-4 border-2 border-dashed border-violet-600/60 rounded-xl cursor-pointer bg-violet-900/10 hover:bg-violet-900/30 active:bg-violet-900/40 hover:border-cyan-400 transition-all text-violet-300 group">
+                            <i data-lucide="upload" class="mb-3 text-violet-400 group-hover:text-cyan-400 transition-colors w-[28px] h-[28px]"></i>
+                            <span id="cred2-foto-label" class="text-sm font-semibold truncate w-full text-center px-4">Toca para subir una foto</span>
+                            <input type="file" id="cred2-foto" class="hidden" accept="image/*">
+                        </label>
+                    </div>
+                    
+                    <div class="mt-auto pt-4">
+                        <button id="cred2-btn-anv" onclick="generateCredAnverso(2)" class="w-full bg-gradient-to-r from-violet-600 to-fuchsia-600 active:from-violet-700 active:to-fuchsia-700 text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_20px_rgba(192,38,211,0.4)] transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-lucide="wand-2" class="btn-icon w-5 h-5"></i>
+                            <i data-lucide="loader-2" class="btn-loader w-5 h-5 animate-spin hidden"></i>
+                            <span>Generar Anverso</span>
+                        </button>
+                    </div>
+
+                    <div id="cred2-res-anv-container" class="hidden mt-6 p-4 bg-[#05050a] border border-cyan-800/60 rounded-2xl">
+                        <p class="text-sm text-cyan-300 mb-3 font-bold text-center">Resultado:</p>
+                        <img id="cred2-res-anv-img" src="" alt="Anverso Generado" class="w-full rounded-xl border border-cyan-900 shadow-lg" />
+                        <button onclick="downloadImage('cred2-res-anv-img', 'anverso_credencial_2.jpg')" class="mt-4 w-full bg-cyan-900/40 hover:bg-cyan-800 active:bg-cyan-700 text-cyan-300 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="download" class="w-5 h-5"></i> Guardar Imagen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PANEL REVERSO -->
+                <div class="bg-[#0b0c16] border border-fuchsia-900/50 rounded-[1.5rem] p-5 sm:p-6 shadow-[0_0_25px_rgba(192,38,211,0.1)] relative overflow-hidden flex flex-col">
+                    <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-fuchsia-400 to-pink-600"></div>
+                    <h2 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-fuchsia-300 to-pink-400 mb-4 flex items-center gap-2">
+                        <i data-lucide="image" class="text-fuchsia-400 w-[22px] h-[22px]"></i> Edición Reverso
+                    </h2>
+
+                    <div class="text-[11px] text-fuchsia-200/80 mb-5 bg-fuchsia-900/20 p-3 rounded-lg border border-fuchsia-800/40 flex items-center gap-2">
+                        <i data-lucide="image" class="shrink-0 w-4 h-4"></i> Plantilla precargada lista.
+                    </div>
+                    
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Nombre Completo</label>
+                        <input type="text" id="cred2-nombre" placeholder="Ej: Juan Pérez" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Fecha de Nacimiento</label>
+                        <input type="text" id="cred2-fecha" placeholder="Ej: 15/08/1990" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Profesión</label>
+                        <input type="text" id="cred2-profesion" placeholder="Ej: Ingeniero" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    <div class="mb-5">
+                        <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Domicilio</label>
+                        <input type="text" id="cred2-domicilio" placeholder="Ej: Av. Principal 123" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                    </div>
+                    
+                    <div class="mt-auto pt-4">
+                        <button id="cred2-btn-rev" onclick="generateCredReverso(2)" class="w-full bg-gradient-to-r from-fuchsia-600 to-pink-600 active:from-fuchsia-700 active:to-pink-700 text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_20px_rgba(236,72,153,0.4)] transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i data-lucide="wand-2" class="btn-icon w-5 h-5"></i>
+                            <i data-lucide="loader-2" class="btn-loader w-5 h-5 animate-spin hidden"></i>
+                            <span>Generar Reverso</span>
+                        </button>
+                    </div>
+
+                    <div id="cred2-res-rev-container" class="hidden mt-6 p-4 bg-[#05050a] border border-fuchsia-800/60 rounded-2xl">
+                        <p class="text-sm text-fuchsia-300 mb-3 font-bold text-center">Resultado:</p>
+                        <img id="cred2-res-rev-img" src="" alt="Reverso Generado" class="w-full rounded-xl border border-fuchsia-900 shadow-lg" />
+                        <button onclick="downloadImage('cred2-res-rev-img', 'reverso_credencial_2.jpg')" class="mt-4 w-full bg-fuchsia-900/40 hover:bg-fuchsia-800 active:bg-fuchsia-700 text-fuchsia-300 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="download" class="w-5 h-5"></i> Guardar Imagen
+                        </button>
+                    </div>
+                </div>
+
+                <!-- DESCARGA DOBLE -->
+                <div id="cred2-download-all" class="hidden lg:col-span-2 flex justify-center mt-2 mb-6">
+                    <button onclick="downloadBoth(2)" class="w-full sm:w-auto bg-gradient-to-r from-emerald-500 to-teal-500 active:from-emerald-600 active:to-teal-600 text-white font-bold py-4 px-8 rounded-2xl shadow-[0_4px_20px_rgba(16,185,129,0.5)] flex items-center justify-center gap-3 transition-transform active:scale-95">
+                        <i data-lucide="save-all" class="w-6 h-6"></i> Descargar Ambas Partes
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA ÁNGULO -->
+        <div id="view-angulo" class="tab-content hidden-tab">
+            <div class="w-full max-w-2xl mx-auto bg-[#0b0c16] border border-indigo-900/50 rounded-[1.5rem] p-5 sm:p-8 shadow-[0_0_25px_rgba(99,102,241,0.1)] relative overflow-hidden flex flex-col">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-indigo-400 to-purple-600"></div>
+                <h2 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-400 mb-4 flex items-center gap-2">
+                    <i data-lucide="camera" class="text-indigo-400 w-6 h-6"></i> Ángulos de Producto
+                </h2>
+                
+                <p class="text-sm text-indigo-200/80 mb-6 leading-relaxed">Sube la foto de un producto y la IA generará 2 tomas adicionales con leves cambios de perspectiva izquierda/derecha.</p>
+                
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-violet-400 mb-2 tracking-wider uppercase">Foto del Producto <span class="text-pink-500">*</span></label>
+                    <label for="angulo-foto" class="flex flex-col items-center justify-center w-full min-h-[120px] p-4 border-2 border-dashed border-violet-600/60 rounded-xl cursor-pointer bg-violet-900/10 hover:bg-violet-900/30 active:bg-violet-900/40 hover:border-cyan-400 transition-all text-violet-300 group">
+                        <i data-lucide="upload" class="mb-3 text-violet-400 group-hover:text-cyan-400 transition-colors w-[28px] h-[28px]"></i>
+                        <span id="angulo-foto-label" class="text-sm font-semibold truncate w-full text-center px-4">Toca para subir una foto</span>
+                        <input type="file" id="angulo-foto" class="hidden" accept="image/*">
+                    </label>
+                </div>
+                
+                <button id="angulo-btn" onclick="generateAngulos()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 active:from-indigo-700 active:to-purple-700 text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_20px_rgba(99,102,241,0.4)] transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed mt-4">
+                    <i data-lucide="wand-2" class="btn-icon w-5 h-5"></i>
+                    <i data-lucide="loader-2" class="btn-loader w-5 h-5 animate-spin hidden"></i>
+                    <span>Generar Nuevos Ángulos</span>
+                </button>
+
+                <div id="angulo-results" class="hidden mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div id="angulo-res1-container" class="hidden flex flex-col gap-3 bg-[#05050a] p-4 rounded-2xl border border-indigo-900/50">
+                        <p class="text-sm text-indigo-300 text-center font-bold">Ángulo 1 (Izquierda)</p>
+                        <img id="angulo-res1-img" src="" alt="Ángulo 1" class="w-full rounded-xl shadow-md" />
+                        <button onclick="downloadImage('angulo-res1-img', 'producto_angulo_1.jpg')" class="w-full bg-indigo-900/40 active:bg-indigo-800 text-indigo-300 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="download" class="w-[18px] h-[18px]"></i> Descargar
+                        </button>
+                    </div>
+                    <div id="angulo-res2-container" class="hidden flex flex-col gap-3 bg-[#05050a] p-4 rounded-2xl border border-purple-900/50">
+                        <p class="text-sm text-purple-300 text-center font-bold">Ángulo 2 (Derecha)</p>
+                        <img id="angulo-res2-img" src="" alt="Ángulo 2" class="w-full rounded-xl shadow-md" />
+                        <button onclick="downloadImage('angulo-res2-img', 'producto_angulo_2.jpg')" class="w-full bg-purple-900/40 active:bg-purple-800 text-purple-300 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-colors">
+                            <i data-lucide="download" class="w-[18px] h-[18px]"></i> Descargar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISTA SIM -->
+        <div id="view-sim" class="tab-content hidden-tab">
+            <div class="w-full max-w-md mx-auto bg-[#0b0c16] border border-emerald-900/50 rounded-[1.5rem] p-5 sm:p-8 shadow-[0_0_25px_rgba(16,185,129,0.1)] relative overflow-hidden flex flex-col">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-400 to-teal-600"></div>
+                <h2 class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-400 mb-4 flex items-center gap-2">
+                    <i data-lucide="smartphone" class="text-emerald-400 w-6 h-6"></i> Edición SIM
+                </h2>
+
+                <div class="text-[11px] text-emerald-200/80 mb-6 bg-emerald-900/20 p-3 rounded-lg border border-emerald-800/40 flex items-center gap-2">
+                    <i data-lucide="image" class="shrink-0 w-4 h-4"></i> Captura base cargada.
+                </div>
+                
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Nueva Hora</label>
+                    <input type="text" id="sim-hora" placeholder="Ej: 14:35" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-cyan-400 mb-2 tracking-wider uppercase">Nuevo Teléfono</label>
+                    <input type="text" id="sim-telefono" placeholder="Ej: +591 71234567" class="w-full bg-[#050510] border-2 border-violet-800/60 text-violet-100 rounded-xl p-4 text-base focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_15px_rgba(34,211,238,0.3)] transition-all placeholder-violet-800/80">
+                </div>
+                
+                <div class="mt-2">
+                    <button id="sim-btn" onclick="generateSim()" class="w-full bg-gradient-to-r from-emerald-600 to-teal-600 active:from-emerald-700 active:to-teal-700 text-white font-bold py-4 px-4 rounded-xl shadow-[0_4px_20px_rgba(16,185,129,0.4)] transition-all flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i data-lucide="wand-2" class="btn-icon w-5 h-5"></i>
+                        <i data-lucide="loader-2" class="btn-loader w-5 h-5 animate-spin hidden"></i>
+                        <span>Generar Captura</span>
+                    </button>
+                </div>
+
+                <div id="sim-res-container" class="hidden mt-8 p-5 bg-[#05050a] border border-emerald-800/60 rounded-2xl flex flex-col items-center">
+                    <p class="text-sm text-emerald-300 mb-4 font-bold text-center">Resultado Generado</p>
+                    <img id="sim-res-img" src="" alt="SIM Generada" class="w-full rounded-xl border border-emerald-900 shadow-lg max-w-[280px]" />
+                    <button onclick="downloadImage('sim-res-img', 'captura_sim_modificada.jpg')" class="mt-6 w-full bg-emerald-900/40 active:bg-emerald-800 text-emerald-300 font-bold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors">
+                        <i data-lucide="download" class="w-5 h-5"></i> Guardar Captura
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- BOTTOM NAVIGATION BAR PARA MÓVILES -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-[#050510]/90 backdrop-blur-2xl border-t border-violet-900/40 z-50 px-2 py-2 pb-safe flex justify-around items-center" id="mobile-nav">
+        <!-- Se llenan por JS -->
+    </nav>
+
+    <!-- TOAST DE NOTIFICACIONES -->
+    <div id="toast" class="hidden fixed top-20 sm:top-auto sm:bottom-6 sm:right-6 left-4 right-4 sm:left-auto bg-rose-950/90 backdrop-blur-md border-2 border-rose-600 text-rose-100 px-5 py-4 rounded-2xl shadow-[0_10px_30px_rgba(244,63,94,0.4)] z-50 items-center gap-3 font-semibold transition-opacity duration-300">
+        <i data-lucide="alert-circle" class="text-rose-500 shrink-0 w-6 h-6"></i>
+        <p id="toast-msg" class="text-sm leading-tight"></p>
+    </div>
+
+    <!-- SCRIPT DE LÓGICA -->
+    <script>
+        // Inicializar iconos
+        lucide.createIcons();
+
+        // --- CONFIGURACIÓN Y ESTADO ---
+        const apiKey = ""; // Inyectado automáticamente por el entorno
+        let activeTab = 'cred1';
+
+        const tabs = [
+            { id: 'cred1', label: 'Credencial 1', short: 'Cred 1', icon: 'id-card' },
+            { id: 'cred2', label: 'Credencial 2', short: 'Cred 2', icon: 'square-user' },
+            { id: 'angulo', label: 'Ángulo', short: 'Ángulo', icon: 'camera' },
+            { id: 'sim', label: 'Editor SIM', short: 'SIM', icon: 'smartphone' },
+        ];
+
+        const idsCred1 = {
+            anverso: "1WAdJGfQ0kFE_jfyYHKWNhpIIGSuLTe0l",
+            reverso: "1fiI0bQyagpYEwzYCjcYgYSqmyPw29F5R"
+        };
+        const idsCred2 = {
+            anverso: "1Sn1TH4sCVtGAQn1mtVviVDxnDfWQhhqR",
+            reverso: "1rdJooQOhnnkwmDeaGj21Oi0iT9wZs0Az"
+        };
+        const idSim = "1vAcrkUffoZiQNwkinkveHg7FNVBPwGSH";
+
+        // --- SISTEMA DE TOAST ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 4000);
+        }
+
+        // --- SISTEMA DE PESTAÑAS ---
+        function renderTabs() {
+            const deskContainer = document.getElementById('desktop-nav');
+            const mobContainer = document.getElementById('mobile-nav');
+            deskContainer.innerHTML = '';
+            mobContainer.innerHTML = '';
+
+            tabs.forEach(tab => {
+                const isActive = activeTab === tab.id;
+
+                // Desktop Tab
+                const btnDesk = document.createElement('button');
+                btnDesk.className = `flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${isActive ? 'bg-violet-600/20 text-cyan-300 border border-cyan-500/50 shadow-[0_0_15px_rgba(6,182,212,0.2)]' : 'bg-transparent text-violet-300 border border-transparent hover:bg-violet-900/30 hover:text-white'}`;
+                btnDesk.innerHTML = `<i data-lucide="${tab.icon}" class="w-[22px] h-[22px]"></i> ${tab.label}`;
+                btnDesk.onclick = () => switchTab(tab.id);
+                deskContainer.appendChild(btnDesk);
+
+                // Mobile Tab
+                const btnMob = document.createElement('button');
+                btnMob.className = `flex flex-col items-center justify-center p-2 min-w-[72px] rounded-xl transition-all ${isActive ? 'text-cyan-400' : 'text-violet-400/70 hover:text-violet-300'}`;
+                btnMob.innerHTML = `
+                    <div class="mb-1 p-1.5 rounded-full transition-colors ${isActive ? 'bg-cyan-500/20' : 'bg-transparent'}">
+                        <i data-lucide="${tab.icon}" class="${isActive ? 'w-6 h-6' : 'w-[22px] h-[22px]'}"></i>
+                    </div>
+                    <span class="text-[10px] font-bold tracking-wide ${isActive ? 'opacity-100' : 'opacity-70'}">${tab.short}</span>
+                `;
+                btnMob.onclick = () => switchTab(tab.id);
+                mobContainer.appendChild(btnMob);
+            });
+            lucide.createIcons();
+        }
+
+        function switchTab(tabId) {
+            activeTab = tabId;
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden-tab'));
+            document.getElementById(`view-${tabId}`).classList.remove('hidden-tab');
+            renderTabs();
+        }
+
+        // --- UTILIDADES ---
+        const fileToBase64 = (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+
+        const downloadImage = (imgId, filename) => {
+            const imgElement = document.getElementById(imgId);
+            if (!imgElement || !imgElement.src) return;
+            const link = document.createElement('a');
+            link.href = imgElement.src;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        };
+
+        const downloadBoth = (type) => {
+            downloadImage(`cred${type}-res-anv-img`, `anverso_credencial_${type}.jpg`);
+            setTimeout(() => downloadImage(`cred${type}-res-rev-img`, `reverso_credencial_${type}.jpg`), 500);
+        };
+
+        // Manejador de inputs de archivo para cambiar el texto visual
+        const setupFileInput = (inputId, labelId) => {
+            document.getElementById(inputId).addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                document.getElementById(labelId).innerText = file ? file.name : 'Toca para subir una foto';
+            });
+        };
+
+        // --- API GEMINI ---
+        const callGemini = async (prompt, base64Images) => {
+            // Se utiliza el modelo preview habilitado para imágenes según especificación técnica
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+
+            const parts = [{ text: prompt }];
+            base64Images.forEach(img => {
+                const base64Data = img.split(',')[1];
+                const mimeType = img.split(';')[0].split(':')[1] || "image/jpeg";
+                parts.push({
+                    inlineData: { mimeType, data: base64Data }
+                });
+            });
+
+            const payload = {
+                contents: [{ parts: parts }],
+                generationConfig: { responseModalities: ["TEXT", "IMAGE"] }
+            };
+
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            let lastError;
+
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`Error de conexión: ${response.status}`);
+                    
+                    const result = await response.json();
+                    const base64 = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                    const mime = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.mimeType || "image/jpeg";
+                    
+                    if (base64) {
+                        return `data:${mime};base64,${base64}`;
+                    } else {
+                        throw new Error("La IA no devolvió ninguna imagen. Intenta de nuevo.");
+                    }
+                } catch (err) {
+                    lastError = err;
+                    if (i < 4) await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+            throw lastError;
+        };
+
+        const fetchTemplateAsBase64 = async (driveId) => {
+            const directUrl = `https://drive.google.com/thumbnail?id=${driveId}&sz=w1500`;
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(directUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(directUrl)}`,
+                `https://corsproxy.io/?${encodeURIComponent(directUrl)}`
+            ];
+
+            for (const proxyUrl of proxies) {
+                try {
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) continue;
+                    const blob = await response.blob();
+                    if (blob.type && !blob.type.startsWith('image/')) continue; 
+                    return await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(blob);
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                    });
+                } catch (error) {
+                    console.warn(`El proxy falló: ${proxyUrl}`, error);
+                }
+            }
+            throw new Error("No se pudo cargar la plantilla base automáticamente. Verifica que el enlace sea accesible.");
+        };
+
+        // UI Loader Helper
+        const setBtnLoading = (btnId, isLoading) => {
+            const btn = document.getElementById(btnId);
+            const icon = btn.querySelector('.btn-icon');
+            const loader = btn.querySelector('.btn-loader');
+            if (isLoading) {
+                btn.disabled = true;
+                icon.classList.add('hidden');
+                loader.classList.remove('hidden');
+            } else {
+                btn.disabled = false;
+                icon.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        };
+
+        // Comprobar si debemos mostrar el botón doble descarga
+        const checkDoubleDownload = (type) => {
+            const imgAnv = document.getElementById(`cred${type}-res-anv-img`).src;
+            const imgRev = document.getElementById(`cred${type}-res-rev-img`).src;
+            if(imgAnv && imgAnv !== window.location.href && imgRev && imgRev !== window.location.href) {
+                document.getElementById(`cred${type}-download-all`).classList.remove('hidden');
+            }
+        };
+
+        // --- LÓGICA DE NEGOCIO ---
+        
+        async function generateCredAnverso(type) {
+            const btnId = `cred${type}-btn-anv`;
+            const carnet = document.getElementById(`cred${type}-carnet`).value;
+            const fileInput = document.getElementById(`cred${type}-foto`);
+            const fotoFile = fileInput.files[0];
+            const ids = type === 1 ? idsCred1 : idsCred2;
+
+            setBtnLoading(btnId, true);
+            try {
+                const tplBase64 = await fetchTemplateAsBase64(ids.anverso);
+                let images = [tplBase64];
+                let prompt = `Edita esta imagen de credencial manteniendo el diseño idéntico. `;
+                
+                if (carnet) prompt += `Cambia el número de carnet o documento a '${carnet}'. `;
+                
+                if (fotoFile) {
+                    const fotoBase64 = await fileToBase64(fotoFile);
+                    images.push(fotoBase64);
+                    prompt += `Reemplaza la foto de perfil en la primera imagen (plantilla) con la persona mostrada en la segunda imagen adjunta. `;
+                    
+                    if (type === 2) {
+                        prompt += `¡MUY IMPORTANTE! La foto generada debe adaptarse estrictamente al formato de una FOTO DE CARNET FORMAL: la persona debe estar mirando directamente al frente (cámara), centrada y bien iluminada. PROHIBIDO AÑADIR BORDES REDONDEADOS O CONTORNOS A LA FOTO. La foto debe tener las esquinas rectas y conservar exactamente el tamaño y recuadro original de la plantilla de referencia. `;
+                    } else {
+                        prompt += `Asegúrate de mantener la misma iluminación, estilo y recuadro original de la credencial. `;
+                    }
+                } else {
+                    prompt += `Mantén la foto de perfil original intacta.`;
+                }
+
+                const result = await callGemini(prompt, images);
+                const imgEl = document.getElementById(`cred${type}-res-anv-img`);
+                imgEl.src = result;
+                document.getElementById(`cred${type}-res-anv-container`).classList.remove('hidden');
+                checkDoubleDownload(type);
+
+            } catch (e) {
+                showToast("Error anverso: " + e.message);
+            }
+            setBtnLoading(btnId, false);
+        }
+
+        async function generateCredReverso(type) {
+            const btnId = `cred${type}-btn-rev`;
+            const nombre = document.getElementById(`cred${type}-nombre`).value;
+            const fecha = document.getElementById(`cred${type}-fecha`).value;
+            const profesion = document.getElementById(`cred${type}-profesion`).value;
+            const domicilio = document.getElementById(`cred${type}-domicilio`).value;
+            const ids = type === 1 ? idsCred1 : idsCred2;
+
+            setBtnLoading(btnId, true);
+            try {
+                const tplBase64 = await fetchTemplateAsBase64(ids.reverso);
+                let prompt = `Edita esta imagen del reverso de una credencial. Mantén todo el diseño, colores y tipografía idénticos. Modifica exactamente los siguientes datos:\n`;
+                if (nombre) prompt += `- Nombre completo: ${nombre}\n`;
+                if (fecha) prompt += `- Fecha de nacimiento: ${fecha}\n`;
+                if (profesion) prompt += `- Profesión: ${profesion}\n`;
+                if (domicilio) prompt += `- Domicilio: ${domicilio}\n`;
+
+                const result = await callGemini(prompt, [tplBase64]);
+                const imgEl = document.getElementById(`cred${type}-res-rev-img`);
+                imgEl.src = result;
+                document.getElementById(`cred${type}-res-rev-container`).classList.remove('hidden');
+                checkDoubleDownload(type);
+
+            } catch (e) {
+                showToast("Error reverso: " + e.message);
+            }
+            setBtnLoading(btnId, false);
+        }
+
+        async function generateAngulos() {
+            const fileInput = document.getElementById('angulo-foto');
+            const fotoFile = fileInput.files[0];
+            
+            if (!fotoFile) return showToast("Sube una imagen de producto primero.");
+            
+            setBtnLoading('angulo-btn', true);
+            try {
+                const base64 = await fileToBase64(fotoFile);
+                const p1 = "Analiza esta fotografía de producto. Genera la misma imagen manteniendo la iluminación y el fondo, pero altera ligeramente el ángulo de cámara moviéndolo un poco hacia la izquierda.";
+                const p2 = "Analiza esta fotografía de producto. Genera la misma imagen manteniendo la iluminación y el fondo, pero altera ligeramente el ángulo de cámara moviéndolo un poco hacia la derecha.";
+                
+                const img1 = await callGemini(p1, [base64]);
+                document.getElementById('angulo-res1-img').src = img1;
+                document.getElementById('angulo-res1-container').classList.remove('hidden');
+                
+                const img2 = await callGemini(p2, [base64]);
+                document.getElementById('angulo-res2-img').src = img2;
+                document.getElementById('angulo-res2-container').classList.remove('hidden');
+                
+                document.getElementById('angulo-results').classList.remove('hidden');
+            } catch (e) {
+                showToast("Error ángulos: " + e.message);
+            }
+            setBtnLoading('angulo-btn', false);
+        }
+
+        async function generateSim() {
+            const hora = document.getElementById('sim-hora').value;
+            const telefono = document.getElementById('sim-telefono').value;
+            
+            if (!hora && !telefono) return showToast("Ingresa hora o teléfono.");
+            
+            setBtnLoading('sim-btn', true);
+            try {
+                const base64 = await fetchTemplateAsBase64(idSim);
+                let prompt = `Edita esta captura de pantalla de teléfono móvil. Mantén toda la interfaz gráfica y fondos idénticos.\n`;
+                if (hora) prompt += `Cambia el texto de la hora por '${hora}'.\n`;
+                if (telefono) prompt += `Cambia el número de teléfono visible por '${telefono}'.`;
+
+                const result = await callGemini(prompt, [base64]);
+                document.getElementById('sim-res-img').src = result;
+                document.getElementById('sim-res-container').classList.remove('hidden');
+            } catch (e) {
+                showToast("Error en edición SIM: " + e.message);
+            }
+            setBtnLoading('sim-btn', false);
+        }
+
+        // INIT
+        setupFileInput('cred1-foto', 'cred1-foto-label');
+        setupFileInput('cred2-foto', 'cred2-foto-label');
+        setupFileInput('angulo-foto', 'angulo-foto-label');
+        renderTabs();
+
+    </script>
+</body>
+</html>
